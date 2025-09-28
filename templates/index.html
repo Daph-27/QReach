@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator</title>
+<style>
+/* Reset and base */
+* { margin:0; padding:0; box-sizing:border-box; }
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  background: radial-gradient(circle at top left, #0d0d2a, #1a1a3f, #121212);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+  min-height: 100vh; 
+  color: #f0f0f0; 
+  overflow-x: hidden; 
+  position: relative; 
+}
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Animated stars */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: starAnimation 1s infinite linear;
+}
+@keyframes starAnimation {
+  from { transform: translateY(-100vh); }
+  to { transform: translateY(100vh); }
+}
+
+/* Container */
+.container { 
+  max-width: 700px; 
+  margin: 0 auto; 
+  padding: 50px 20px; 
+  position: relative; 
+  z-index: 10; 
+}
+
+/* Heading */
+h1 { 
+  text-align: center; 
+  margin-bottom: 30px; 
+  font-size: 2.8em; 
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1, #ff9ff3); 
+  background-size: 300% 300%; 
+  animation: gradientText 6s linear infinite; 
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent; 
+  background-clip: text;
+  letter-spacing: 2px;
+}
+@keyframes gradientText {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Form container */
+.form-container { 
+  background: rgba(255,255,255,0.05); 
+  backdrop-filter: blur(15px); 
+  border: 1px solid rgba(255,255,255,0.2); 
+  border-radius: 20px; 
+  padding: 35px; 
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.form-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 50px rgba(0,0,0,0.8);
+}
+
+/* Inputs & Select */
+.form-group { margin-bottom: 20px; }
+label { display: block; margin-bottom: 8px; font-weight: bold; color: #e0e0e0; }
+input, select { 
+  width: 100%; 
+  padding: 14px; 
+  background: rgba(255,255,255,0.08); 
+  border: 2px solid rgba(255,255,255,0.2); 
+  border-radius: 10px; 
+  color: #f0f0f0; 
+  font-size: 16px; 
+  transition: all 0.3s ease; 
+}
+input:focus, select:focus { 
+  outline: none; 
+  border-color: #48dbfb; 
+  box-shadow: 0 0 12px rgba(72,219,251,0.6); 
+}
+input::placeholder { color: rgba(255,255,255,0.6); }
+
+/* Size options */
+.size-options { display: flex; gap: 15px; }
+.size-options>div { flex: 1; }
+
+/* Buttons */
+.generate-btn { 
+  width: 100%; 
+  padding: 15px; 
+  background: linear-gradient(135deg, #ff6b6b, #48dbfb, #1dd1a1); 
+  border: none; 
+  border-radius: 12px; 
+  color: #fff; 
+  font-size: 18px; 
+  font-weight: bold; 
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+  position: relative; 
+  overflow: hidden; 
+}
+.generate-btn:hover { 
+  transform: translateY(-2px) scale(1.02); 
+  box-shadow: 0 6px 18px rgba(255,107,107,0.5); 
+}
+
+/* Result section */
+.result-section { 
+  margin-top: 35px; 
+  text-align: center; 
+  background: rgba(255,255,255,0.05); 
+  backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255,255,255,0.15); 
+  border-radius: 20px; 
+  padding: 30px; 
+  display: none; 
+}
+.result-section.show { 
+  display: block; 
+  animation: fadeIn 0.6s ease; 
+}
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(20px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+/* QR display */
+.qr-display { 
+  background: #fff; 
+  padding: 20px; 
+  border-radius: 15px; 
+  display: inline-block; 
+  margin: 20px 0; 
+  box-shadow: 0 6px 25px rgba(0,0,0,0.4); 
+}
+
+/* Action buttons */
+.action-buttons { 
+  display: flex; 
+  gap: 12px; 
+  justify-content: center; 
+  flex-wrap: wrap; 
+  margin-top: 20px; 
+}
+.action-btn { 
+  padding: 12px 24px; 
+  background: rgba(255,255,255,0.12); 
+  border: 1px solid rgba(255,255,255,0.25); 
+  color: #f0f0f0; 
+  text-decoration: none; 
+  border-radius: 10px; 
+  font-weight: bold; 
+  transition: all 0.3s ease; 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px; 
+}
+.action-btn:hover { 
+  background: rgba(255,255,255,0.25); 
+  transform: translateY(-2px) scale(1.03); 
+}
+
+/* History link */
+.history-link { text-align: center; margin-top: 35px; }
+.history-link a { 
+  color: #48dbfb; 
+  text-decoration: none; 
+  font-size: 18px; 
+  font-weight: bold;
+  transition: all 0.3s ease; 
+}
+.history-link a:hover { 
+  color: #ff6b6b; 
+  text-shadow: 0 0 12px rgba(255,107,107,0.7); 
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .container{padding:20px 10px;} 
+  h1{font-size:2.2em;} 
+  .size-options{flex-direction:column; gap:10px;} 
+  .action-buttons{flex-direction:column;} 
+}
+</style>
+</head>
+<body>
+<!-- Adding random stars to the background -->
+<script>
+function generateStars(numStars) {
+  for (let i = 0; i < numStars; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1; // Random star size between 1px and 4px
+    const left = Math.random() * 100 + '%';
+    const top = Math.random() * 100 + '%';
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = left;
+    star.style.top = top;
+    star.style.animationDuration = (Math.random() * 2 + 3) + 's'; // Random speed of movement
+    document.body.appendChild(star);
+  }
+}
+generateStars(200);  // Generate 200 stars for a more dynamic look
+</script>
+
+<div class="container">
+<h1>QReach</h1>
+<div class="form-container">
+<form method="POST" action="{{ url_for ('index') }}">
+<div class="form-group">
+<input type="text" name="url" placeholder="Enter URL here" required>
+</div>
+<div class="size-options">
+<div class="form-group">
+<label>Size:</label>
+<select name="size">
+<option value="small">Small</option>
+<option value="medium" selected>Medium</option>
+<option value="large">Large</option>
+</select>
+</div>
+</div>
+<button type="submit" class="generate-btn">Generate QR Code</button>
+</form>
+</div>
+
+{% if qr_code %}
+<div id="result" class="result-section show">
+<h2>Generated QR Code</h2>
+<div id="qrDisplay" class="qr-display">
+<img src="{{ qr_code }}" alt="QR Code" style="max-width:100%; height:auto;">
+</div>
+<div class="action-buttons">
+<a href="{{ qr_code }}" class="action-btn" download="qrcode.png">⬇ Download</a>
+<a href="https://api.whatsapp.com/send?text={{ url }}" class="action-btn" target="_blank">📲 Share on WhatsApp</a>
+<a href="mailto:?subject=QR Code&body={{ url }}" class="action-btn" target="_blank">✉ Share via Email</a>
+</div>
+</div>
+{% endif %}
+
+<div class="history-link">
+<a href="{{ url_for('view_history') }}">View History</a>
+</div>
+</div>
+
+<script>
+// Sparkles effect for the galaxy look
+function createSparkle(){
+  const sparkle = document.createElement('div');
+  sparkle.className='sparkle';
+  sparkle.style.left=Math.random()*100+'%';
+  sparkle.style.top=Math.random()*100+'%';
+  sparkle.style.animationDelay=Math.random()*2+'s';
+  document.body.appendChild(sparkle);
+  setTimeout(()=>{ sparkle.remove(); },2000);
+}
+setInterval(createSparkle,200);
+</script>
+</body>
+</html>
